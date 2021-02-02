@@ -2,6 +2,7 @@ import praw
 import requests
 import string
 import pandas as pd
+import re
 from bs4 import BeautifulSoup
 
 #Reddit PRAW Config 
@@ -12,6 +13,7 @@ hot_votes = subreddit.hot()
 #Stock ticker Config
 company_name = []
 company_ticker = []
+reddit_tickers = []
 NYSE_URL = 'https://www.advfn.com/nyse/newyorkstockexchange.asp?companies='
 NASDAQ_URL = 'https://www.advfn.com/nasdaq/nasdaq.asp?companies='
 
@@ -54,14 +56,20 @@ for posts in hot_votes:
     if not posts.stickied: 
         try:
             
-            print('Title : {}'.format(posts.title))
+            print('Title : {}'.format(posts.title.encode("utf-8" , errors="ignore")))
             print('Score : {} , Ratio : {}' .format(posts.score, posts.upvote_ratio))
             posts.comments.replace_more(limit=0) #Takes all comments and lists them out 
+            
+            print("REGEX !!!!!!!!!!")
+            print(re.findall(r'[$]\S*',(posts.title)))
+            reddit_tickers.append(re.findall(r'[$]\S*',(posts.title)))
             
             for comment in posts.comments.list():
                 print(20 * '-')
                 print(comment.body.encode("utf-8", errors='ignore'))
-                print('Comment Score : {} ' .format(comment.score))
-        
+                print('Comment Score : {} ' .format(comment.score)) 
+            
         except praw.exceptions.PRAWException as e:
             pass
+
+#Regular expression stock ticker extraction
